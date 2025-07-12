@@ -74,42 +74,69 @@ userRouter.get("/connections", userAuth, async (req, res) => {
   }
 });
 
-  userRouter.get("/feed", userAuth, async (req, res) => {
-    try {
-      const loggedInUser = req.user;
+userRouter.get("/feed", userAuth, async (req, res) => {
+  const MAX_LIMIT = 50;
+  const DEFAULT_LIMIT = 10;
+  const DEFAULT_PAGE = 1; 
 
-      const otherUsers = await ConnectionRequest.find({
-        $or: [
-          { 
-            fromUserId: loggedInUser._id 
-          },
-          {
-            toUserId: loggedInUser._id,status:{$ne:"intersted"} 
-          },
-        ],
-      }).select("fromUserId toUserId")
+  const page = parseInt(req.query.page) || DEFAULT_PAGE;
+  const limit = parseInt(req.query.limit) || DEFAULT_LIMIT;
+  
+  if(limit>MAX_LIMIT){
+    limit=MAX_LIMIT;
+  }
+  
+  if(page<1){
+    page=DEFAULT_PAGE
+  }
+  
+  const skip = (page - 1) * limit;
+  try {
+    const loggedInUser = req.user;
+    const otherUsers = await ConnectionRequest.find({
+      $or: [
+        {
+          fromUserId: loggedInUser._id,
+        },
+        {
+          toUserId: loggedInUser._id,
+          status: { $ne: "intersted" },
+        },
+      ],
+    }).select("fromUserId toUserId");
 
-      const hideUserFromFeed= new Set();
-      otherUsers.forEach((user)=>{
+    const hideUserFromFeed = new Set();
+    otherUsers.forEach((user) => {
       hideUserFromFeed.add(user.fromUserId.toString());
-      hideUserFromFeed.add(user.toUserId.toString())
-      })
+      hideUserFromFeed.add(user.toUserId.toString());
+    });
 
-      console.log(hideUserFromFeed);
+    // console.log(hideUserFromFeed);
 
+    // feed users
+    const userToShow = await User.find({
+      $and: [
+        {
+          _id: { $nin: [...hideUserFromFeed] },
+        },
+        {
+          _id: { $ne: loggedInUser._id },
+        },
+      ],
+    })
+      .select("firstname lastname photoUrl skills about")
+      .skip(skip)
+      .limit(limit);
 
-      // feed users
-      const userToShow= await User.find({
-        _id:{$nin:[...hideUserFromFeed]}
-      })
-
-      res.json({
-        userToShow
-      })
-
-      // const userAccordingToFeed=
-    } catch (err) {}
-  });
+    res.json({
+      userToShow,
+    });
+  } catch (err) {
+    res.json({
+      error: `${err.message}`,
+    });
+  }
+});
 
 module.exports = {
   userRouter,
