@@ -1,0 +1,116 @@
+const express = require("express");
+
+// auth middleqware
+const { userAuth } = require("../middlewares/auth");
+
+// models
+const { User } = require("../models/user");
+const { ConnectionRequest } = require("../models/connectionRequest");
+const { requestRouter } = require("./request");
+
+// Router
+const userRouter = express.Router();
+
+userRouter.get("/requests", userAuth, async (req, res) => {
+  const loggedInUser = req.user;
+
+  try {
+    const requests = await ConnectionRequest.find({
+      toUserId: loggedInUser._id,
+      status: "intersted",
+    }).populate("fromUserId", ["firstname", "lastname"]);
+
+    if (requests.length == 0) {
+      return res.status(200).json({
+        message: "You are all caught up.",
+        data: [],
+      });
+    }
+
+    res.json({
+      data: requests,
+    });
+  } catch (err) {
+    res.json({
+      error: `${err.message}`,
+    });
+  }
+});
+
+userRouter.get("/connections", userAuth, async (req, res) => {
+  const loggedInUser = req.user;
+  try {
+    const allConnections = await ConnectionRequest.find({
+      $or: [
+        { toUserId: loggedInUser._id, status: "accepted" },
+        { fromUserId: loggedInUser._id, status: "accepted" },
+      ],
+    })
+      .populate("fromUserId", "firstname lastname")
+      .populate("toUserId", "firstname lastname");
+
+    if (!allConnections.length) {
+      return res.json({
+        message: "no Connections Yet.",
+        data: [],
+      });
+    }
+
+    const data = allConnections.map((row) => {
+      if (row.fromUserId._id.toString() === loggedInUser._id.toString()) {
+        return row.toUserId;
+      }
+      return row.fromUserId;
+    });
+
+    res.json({
+      message: "Connections found",
+      data: data,
+    });
+  } catch (err) {
+    res.json({
+      error: `${err.message}`,
+    });
+  }
+});
+
+  userRouter.get("/feed", userAuth, async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+
+      const otherUsers = await ConnectionRequest.find({
+        $or: [
+          { 
+            fromUserId: loggedInUser._id 
+          },
+          {
+            toUserId: loggedInUser._id,status:{$ne:"intersted"} 
+          },
+        ],
+      }).select("fromUserId toUserId")
+
+      const hideUserFromFeed= new Set();
+      otherUsers.forEach((user)=>{
+      hideUserFromFeed.add(user.fromUserId.toString());
+      hideUserFromFeed.add(user.toUserId.toString())
+      })
+
+      console.log(hideUserFromFeed);
+
+
+      // feed users
+      const userToShow= await User.find({
+        _id:{$nin:[...hideUserFromFeed]}
+      })
+
+      res.json({
+        userToShow
+      })
+
+      // const userAccordingToFeed=
+    } catch (err) {}
+  });
+
+module.exports = {
+  userRouter,
+};
