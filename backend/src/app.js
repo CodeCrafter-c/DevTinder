@@ -1,6 +1,7 @@
 // npm installed or built in moduels
 const express = require("express"); // importing express for routing
 const cookieParser = require("cookie-parser");
+const cors=require("cors")
 
 //  self cretaed modules
 const { connection } = require("../config/database"); // importing db connection
@@ -12,6 +13,12 @@ const port = 3000;
 app.use(express.json());
 // used to read cookies
 app.use(cookieParser());
+// cors 
+app.use(cors({
+  origin:"http://localhost:5173",
+  credentials:true
+}))
+
 
 // routers
 const {authRouter} = require("./routes/auth");

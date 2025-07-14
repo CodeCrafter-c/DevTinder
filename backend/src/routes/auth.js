@@ -63,7 +63,7 @@ authRouter.post("/login", async (req, res) => {
     // retruning token inside a cookie
     res.cookie("token", token), { httpOnly: true };
 
-    res.send(`${user.firstname} logged in sucessfully`);
+    res.status(200).json(user)
   } catch (err) {
     res.status(401).send("Failed to login : " + err.message);
   }
