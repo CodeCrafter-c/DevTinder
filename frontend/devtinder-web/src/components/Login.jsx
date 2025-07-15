@@ -1,26 +1,35 @@
 import React, { useState } from "react";
-import axios from "axios"
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { addUser } from "../utils/userSlice";
+import { useNavigate } from "react-router-dom";
+import { BASE_URL } from "../utils/constants";
+
 
 export default function Login() {
+  const [emailId, setEmailId] = useState("kanav2005@gmail.com");
+  const [password, setPassword] = useState("kanav@123");
+  const dispatch=useDispatch();
+  const navigate=useNavigate()
 
-  const [emailId, setEmailId]=useState("kanav2005@gmail.com");
-  const [password, setPassword]=useState("kanav@123");  
-
-  const handleLogin=async function(){
-    
-    try{
-      const res= await axios.post("http://localhost:3000/auth/login",{
-        email:emailId,
-        password
-},{withCredentials:true})        
-
+  const handleLogin = async function () {
+    try {
+      const res = await axios.post(
+        BASE_URL+"auth/login",
+        {
+          email: emailId,
+          password,
+        },
+        { withCredentials: true }
+      );
+      
+      dispatch(addUser(res.data));
+      return navigate("/")
+    } catch (err) {
+      console.error(err);
     }
-    catch(err){
-      console.error(err)
-    }
-
-  }
-
+  };
+  
   return (
     <div className="flex justify-center my-20">
       <div className="card bg-base-200 w-96 shadow-sm">
@@ -36,7 +45,9 @@ export default function Login() {
                 type="text"
                 className="input input-bordered w-full max-w-xs"
                 value={emailId}
-                onChange={(e)=>{ setEmailId(e.target.value)}}
+                onChange={(e) => {
+                  setEmailId(e.target.value);
+                }}
               />
             </div>
 
@@ -49,13 +60,17 @@ export default function Login() {
                 type="password"
                 className="input input-bordered w-full max-w-xs"
                 value={password}
-                onChange={(e)=>{ setPassword(e.target.value)}}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                }}
               />
             </div>
           </div>
 
           <div className="card-actions justify-center mt-3">
-            <button className="btn btn-primary" onClick={handleLogin}>login</button>
+            <button className="btn btn-primary" onClick={handleLogin}>
+              login
+            </button>
           </div>
         </div>
       </div>
