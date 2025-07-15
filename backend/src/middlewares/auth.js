@@ -6,7 +6,7 @@ const userAuth=async function(req,res,next){
     try{
         const {token}=req.cookies;
         if(!token){
-            throw new Error("invalid token");
+            return res.status(401).send("You are not authorized")
         }
 
         // verfiy token
