@@ -124,9 +124,11 @@ userRouter.get("/feed", userAuth, async (req, res) => {
         },
       ],
     })
-      .select("firstname lastname photoUrl skills about")
+      .select("firstname lastname photoUrl skills About age gender")
       .skip(skip)
       .limit(limit);
+
+      console.log(userToShow)
 
     res.json({
       userToShow,

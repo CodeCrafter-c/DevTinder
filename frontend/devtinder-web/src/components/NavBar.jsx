@@ -21,7 +21,7 @@ export default function NavBar() {
       
       // clear the redux store
       dispatch(removeUser());
-
+      
       //redirect to the login page
       naviagte("/login")
     } catch (err) {
