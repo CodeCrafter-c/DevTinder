@@ -18,7 +18,7 @@ userRouter.get("/requests", userAuth, async (req, res) => {
     const requests = await ConnectionRequest.find({
       toUserId: loggedInUser._id,
       status: "intersted",
-    }).populate("fromUserId", ["firstname", "lastname"]);
+    }).populate("fromUserId", ["firstname", "lastname","About","photoUrl"]);
 
     if (requests.length == 0) {
       return res.status(200).json({
@@ -46,8 +46,8 @@ userRouter.get("/connections", userAuth, async (req, res) => {
         { fromUserId: loggedInUser._id, status: "accepted" },
       ],
     })
-      .populate("fromUserId", "firstname lastname")
-      .populate("toUserId", "firstname lastname");
+      .populate("fromUserId", "firstname lastname About photoUrl")
+      .populate("toUserId", "firstname lastname About photoUrl");
 
     if (!allConnections.length) {
       return res.json({
