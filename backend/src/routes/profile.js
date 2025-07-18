@@ -16,11 +16,15 @@ profileRouter.get("/view", userAuth, async (req, res) => {
 
 
 
-profileRouter.patch("/edit",userAuth,(req,res)=>{
+profileRouter.patch("/edit",userAuth,async(req,res)=>{
   try{
     validateUserEditDetails(req);
-    // console.log(req.user);
-    res.json(req.user);
+    const user= await req.user.save()
+    // console.log(user)
+    res.json({
+      "message":"Profile updated successfully",
+      "data":user
+    });
   }
   catch(err){{
     res.json({
