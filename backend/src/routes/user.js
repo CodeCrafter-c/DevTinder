@@ -18,7 +18,7 @@ userRouter.get("/requests", userAuth, async (req, res) => {
     const requests = await ConnectionRequest.find({
       toUserId: loggedInUser._id,
       status: "intersted",
-    }).populate("fromUserId", ["firstname", "lastname","About","photoUrl"]);
+    }).populate("fromUserId", ["firstname", "lastname", "About", "photoUrl"]);
 
     if (requests.length == 0) {
       return res.status(200).json({
@@ -77,19 +77,19 @@ userRouter.get("/connections", userAuth, async (req, res) => {
 userRouter.get("/feed", userAuth, async (req, res) => {
   const MAX_LIMIT = 50;
   const DEFAULT_LIMIT = 10;
-  const DEFAULT_PAGE = 1; 
+  const DEFAULT_PAGE = 1;
 
   const page = parseInt(req.query.page) || DEFAULT_PAGE;
   const limit = parseInt(req.query.limit) || DEFAULT_LIMIT;
-  
-  if(limit>MAX_LIMIT){
-    limit=MAX_LIMIT;
+
+  if (limit > MAX_LIMIT) {
+    limit = MAX_LIMIT;
   }
-  
-  if(page<1){
-    page=DEFAULT_PAGE
+
+  if (page < 1) {
+    page = DEFAULT_PAGE;
   }
-  
+
   const skip = (page - 1) * limit;
   try {
     const loggedInUser = req.user;
@@ -107,11 +107,14 @@ userRouter.get("/feed", userAuth, async (req, res) => {
 
     const hideUserFromFeed = new Set();
     otherUsers.forEach((user) => {
-      hideUserFromFeed.add(user.fromUserId.toString());
-      hideUserFromFeed.add(user.toUserId.toString());
+      if (user.fromUserId.toString() === loggedInUser._id.toString()) {
+        hideUserFromFeed.add(user.toUserId.toString());
+      } else {
+        hideUserFromFeed.add(user.fromUserId.toString());
+      }
     });
 
-    // console.log(hideUserFromFeed);
+    console.log(hideUserFromFeed);
 
     // feed users
     const userToShow = await User.find({
@@ -128,7 +131,7 @@ userRouter.get("/feed", userAuth, async (req, res) => {
       .skip(skip)
       .limit(limit);
 
-      // console.log(userToShow)
+    // console.log(userToShow)
 
     res.json({
       userToShow,
