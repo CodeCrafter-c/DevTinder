@@ -1,9 +1,10 @@
-import axios from "axios"; 
+import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { BASE_URL } from "../utils/constants";
 import { useDispatch, useSelector } from "react-redux";
-import { addRequests } from "../utils/requestStore";
-import {SkeletonCard} from "./SkeletonCard"; // Adjust path if needed
+import { addRequests, removeRequest } from "../utils/requestStore";
+import { SkeletonCard } from "./SkeletonCard"; // Adjust path if needed
+import { Tuple } from "@reduxjs/toolkit";
 
 export default function Request() {
   const requests = useSelector((store) => store.requests);
@@ -16,11 +17,25 @@ export default function Request() {
       const res = await axios.get(BASE_URL + "user/requests", {
         withCredentials: true,
       });
+      console.log(res.data.data);
       dispatch(addRequests(res.data.data));
     } catch (err) {
       console.error("Error fetching connections", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const reviewRequest = async (status, id) => {
+    try {
+      const res = await  axios.post(
+        BASE_URL + "request/review/" + status + "/" + id,
+        {},
+        { withCredentials: true }
+      );
+      dispatch(removeRequest(id))
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -72,8 +87,13 @@ export default function Request() {
 
               {/* Hover Buttons */}
               <div className="hidden group-hover:flex gap-2 flex-wrap justify-center sm:justify-end w-full sm:w-auto">
-                <button className="btn btn-xs btn-success">Accept</button>
-                <button className="btn btn-xs btn-outline btn-error">
+                <button className="btn btn-xs btn-success" onClick={(e) => {reviewRequest("accepted",req.fromUserId._id)}}>
+                  Accept
+                </button>
+                <button
+                  className="btn btn-xs btn-outline btn-error"
+                  onClick={(e) => {reviewRequest("rejected",req.fromUserId._id)}}
+                >
                   Decline
                 </button>
               </div>

@@ -7,6 +7,18 @@ const requestSlice=createSlice({
         addRequests:(state,action)=>{
             return action.payload;
         },
+        removeRequest:(state,action)=>{
+            state=state.filter((req)=>{
+                if (req.fromUserId._id===action.payload){
+                    return;
+                }
+                else{
+                    return req;
+                }
+            })
+            console.log(state);
+            return state;
+        }
     }
 })
 
