@@ -87,7 +87,7 @@ requestRouter.post("/send/:status/:userId",userAuth,async(req,res)=>{
     const loggedInUser=req.user;
     const {status,requestId}=req.params ;   
     const allowewdStatus=["accepted","rejected"]
-
+            // console.log(requestId)
         try{
             // checking if status valid or not
             if(!allowewdStatus.includes(status)){
@@ -95,11 +95,11 @@ requestRouter.post("/send/:status/:userId",userAuth,async(req,res)=>{
             }
 
             const connectionRequest= await ConnectionRequest.findOne({
-                _id:requestId,
+                fromUserId:requestId,
                 toUserId:loggedInUser._id,
                 status:"intersted"
             })
-
+            // console.log(connectionRequest);
             if(!connectionRequest){
                 throw new Error("No pending 'intersted' connection request from this user")
             }
