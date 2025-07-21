@@ -18,9 +18,12 @@ const requestSlice=createSlice({
             })
             console.log(state);
             return state;
+        },
+        clearRequest:()=>{
+            return null
         }
     }
 })
 
-export const {addRequests,removeRequest}=requestSlice.actions;
+export const {addRequests,removeRequest,clearRequest}=requestSlice.actions;
 export default requestSlice.reducer;

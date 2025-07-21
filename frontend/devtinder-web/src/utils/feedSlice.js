@@ -15,9 +15,12 @@ const feedSlice = createSlice({
         return user
       });
       return newFeed
-    }
-  },
+    },
+    clearFeed:()=>{
+    return null;
+  }
+  }, 
 });
 
-export const {addFeed,removeUserFromFeed}=feedSlice.actions;
+export const {addFeed,removeUserFromFeed,clearFeed}=feedSlice.actions;
 export default feedSlice.reducer;

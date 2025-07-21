@@ -58,7 +58,7 @@ export default function EditProfile({ user }) {
               <input
                 id="firstname"
                 type="text"
-                className="input input-bordered w-full"
+                className="input input-bordered w-full bg-base-100"
                 value={firstname}
                 onChange={(e) => setFirstname(e.target.value)}
               />
@@ -71,7 +71,7 @@ export default function EditProfile({ user }) {
               <input
                 id="lastname"
                 type="text"
-                className="input input-bordered w-full"
+                className="input input-bordered w-full bg-base-100"
                 value={lastname}
                 onChange={(e) => setLastname(e.target.value)}
               />
@@ -86,7 +86,7 @@ export default function EditProfile({ user }) {
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                className="input input-bordered w-full"
+                className="input input-bordered w-full bg-base-100 autofill:bg-base-100"
                 value={age}
                 onChange={(e) => {
                   if (/^\d*$/.test(e.target.value)) {
@@ -101,7 +101,7 @@ export default function EditProfile({ user }) {
                 <span className="label-text mb-1.5">About</span>
               </label>
               <textarea
-                className="textarea textarea-bordered w-full"
+                className="textarea textarea-bordered w-full bg-base-100"
                 id="about"
                 value={About}
                 onChange={(e) => setAbout(e.target.value)}
