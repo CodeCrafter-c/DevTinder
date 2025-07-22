@@ -1,14 +1,17 @@
+//// dotnev for security
+require('dotenv').config()
+
 // npm installed or built in moduels
-const express = require("express"); // importing express for routing
+const express = require("express");// importing express for routing
 const cookieParser = require("cookie-parser");
 const cors=require("cors")
 
 //  self cretaed modules
+console.log(process.env.DB_CONNECTION_STRING);
 const { connection } = require("../config/database"); // importing db connection
 
 const app = express();
 const port = 3000;
-
 // used to read the json from the request body
 app.use(express.json());
 // used to read cookies
