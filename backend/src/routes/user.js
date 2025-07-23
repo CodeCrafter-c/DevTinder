@@ -114,7 +114,7 @@ userRouter.get("/feed", userAuth, async (req, res) => {
       }
     });
 
-    console.log(hideUserFromFeed);
+    // console.log(hideUserFromFeed);
 
     // feed users
     const userToShow = await User.find({

@@ -60,7 +60,7 @@ authRouter.post("/login", async (req, res) => {
     // comapring password with the hashed one
     const checkPassword = await user.validatePassword(password);
     if (!checkPassword) {
-      throw new Error("Invalid credentials");
+      throw new Error("Invalid credentialss");
     }
 
     // creating token
