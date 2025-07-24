@@ -82,9 +82,19 @@ const validateUserEditDetails = function (req) {
   }
 };
 
+const validateEmail=function(email){
+  
+  if(validator.isEmail(email)){
+    return true;
+  }
+  else{
+    throw new Error("Not a valid email")
+  }
+}
 
 module.exports = {
   validateSignUpData,
   validateUserEditDetails,
+  validateEmail
 };
  

@@ -7,7 +7,7 @@ const cookieParser = require("cookie-parser");
 const cors=require("cors")
 
 //  self cretaed modules
-console.log(process.env.DB_CONNECTION_STRING);
+// console.log(process.env.DB_CONNECTION_STRING);
 const { connection } = require("../config/database"); // importing db connection
 
 const app = express();
