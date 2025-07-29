@@ -4,6 +4,7 @@ import { BASE_URL } from "../utils/constants";
 import { useDispatch, useSelector } from "react-redux";
 import { addConnections } from "../utils/connectionSlice";
 import { SkeletonCard } from "./SkeletonCard"; // 👈 Import skeleton
+import { Link } from "react-router-dom";
 
 export default function Connections() {
   const connections = useSelector((store) => store.connection);
@@ -75,7 +76,7 @@ export default function Connections() {
 
               {/* Hover Buttons */}
               <div className="hidden group-hover:flex gap-2 flex-wrap justify-center sm:justify-end w-full sm:w-auto">
-                <button className="btn btn-xs btn-accent">View</button>
+                <Link to={'/chat/'+conn._id}><button className="btn btn-xs btn-accent text-white">Message</button></Link>
                 <button className="btn btn-xs btn-outline btn-error">
                   Remove
                 </button>
