@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+ import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { createSocketConnection } from "../utils/socket";
 import { useSelector } from "react-redux";
@@ -6,37 +6,74 @@ import axios from "axios";
 import { BASE_URL } from "../utils/constants";
 
 export default function ChatBox() {
+
+  const messagesEndRef = useRef(null);
+
   const { targetUserId } = useParams();
   const cleanedTargetUserId = targetUserId.replace(/^:/, "");
   const loggedInUser = useSelector((store) => store.user);
   const userId = loggedInUser?._id;
+  const [otherUserDetails, setOtherUserDetails] = useState("");
 
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const textareaRef = useRef(null);
   const MAX_MESSAGE_LENGTH = 300;
 
+const fetchChatMessages = async () => {
+  try {
+    const chat = await axios.get(BASE_URL + "chat/" + cleanedTargetUserId, {
+      withCredentials: true,
+    });
 
+    if (!chat?.data?.messages) {
+      return showToast("Unable to load chat");
+    }
 
-  const fetchChatMessages=async()=>{
-    const res=await  axios.get(BASE_URL+'chat/'+cleanedTargetUserId,{withCredentials:true})
-    console.log(res)
+    const chatData = chat.data.messages;
+    const participants = chatData.participants;
+
+    // Get the other user's details (not the logged-in user)
+    const otherUser = participants.find((user) => user._id !== userId);
+    if (otherUser) {
+      const firstname = otherUser.firstname || "";
+      const lastname = otherUser.lastname || "";
+      setOtherUserDetails({name:firstname+' '+lastname , photoUrl:otherUser.photoUrl});
+    }
+
+    const messages = chatData.messages;
+    if (!messages.length) return;
+
+    const chatMessages = messages.map((msg) => ({
+      firstname: msg?.senderId?.firstname,
+      lastname: msg?.senderId?.lastname || "",
+      text: msg.text,
+      timeStamp: msg.createdAt,
+      _id: msg._id,
+      senderId: msg.senderId._id,
+    }));
+
+    setMessages(chatMessages);
+  } catch (err) {
+    console.error(err);
+    showToast("Something went wrong while loading chat");
   }
+};
 
   // Default messages when userId becomes available
   useEffect(() => {
-    fetchChatMessages()
     if (!userId) return;
-    setMessages([
-      { _id: 1, senderId: userId, text: "Hey 👋" },
-      { _id: 2, senderId: cleanedTargetUserId, text: "Hi! What's up?" },
-      { _id: 3, senderId: userId, text: "Want to collab on something cool?" },
-      {
-        _id: 4,
-        senderId: cleanedTargetUserId,
-        text: "Sounds good! Share the idea. Also thiswordisreallyreallyreallylongandshouldnotoverflow",
-      },
-    ]);
+    fetchChatMessages();
+    // setMessages([
+    //   { _id: 1, senderId: userId, text: "Hey 👋" },
+    //   { _id: 2, senderId: cleanedTargetUserId, text: "Hi! What's up?" },
+    //   { _id: 3, senderId: userId, text: "Want to collab on something cool?" },
+    //   {
+    //     _id: 4,
+    //     senderId: cleanedTargetUserId,
+    //     text: "Sounds good! Share the idea. Also thiswordisreallyreallyreallylongandshouldnotoverflow",
+    //   },
+    // ]);
   }, [userId]);
 
   useEffect(() => {
@@ -61,6 +98,11 @@ export default function ChatBox() {
     };
   }, [cleanedTargetUserId, userId]);
 
+    useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+
   const sendMessage = () => {
     const socket = createSocketConnection();
     socket.emit("sendMessage", {
@@ -70,6 +112,7 @@ export default function ChatBox() {
       firstname: loggedInUser.firstname,
     });
   };
+
 
   const showToast = (msg) => {
     const toast = document.createElement("div");
@@ -111,11 +154,15 @@ export default function ChatBox() {
 
     if (textareaRef.current) {
       textareaRef.current.style.height = "2.75rem"; // reset first
-      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 150) + "px";
+      textareaRef.current.style.height =
+        Math.min(textareaRef.current.scrollHeight, 150) + "px";
     }
   };
 
-  return (
+
+
+  
+return (
     <div className="w-full min-h-screen flex justify-center items-center bg-base-100 px-2">
       <div className="w-full max-w-md h-[90vh] flex flex-col border rounded-xl shadow bg-base-200">
         {/* Header */}
@@ -123,13 +170,13 @@ export default function ChatBox() {
           <div className="avatar">
             <div className="w-10 rounded-full">
               <img
-                src={`https://api.dicebear.com/7.x/thumbs/svg?seed=${targetUserId}`}
+                src={otherUserDetails.photoUrl}
                 alt="Avatar"
               />
             </div>
           </div>
           <div>
-            <h2 className="font-semibold text-lg">Chat with User</h2>
+            <h2 className="font-semibold text-lg">{otherUserDetails.name}</h2>
             <p className="text-sm text-success">Online</p>
           </div>
         </div>
@@ -139,21 +186,28 @@ export default function ChatBox() {
           {messages.map((msg) => (
             <div
               key={msg._id}
-              className={`chat ${msg.senderId === userId ? "chat-end" : "chat-start"}`}
+              className={`chat ${
+                msg.senderId === userId ? "chat-end" : "chat-start"
+              }`}
             >
               {msg.senderId !== userId && (
                 <div className="chat-image avatar">
                   <div className="w-8 rounded-full">
                     <img
-                      src={`https://api.dicebear.com/7.x/thumbs/svg?seed=${msg.senderId}`}
+                      src={otherUserDetails.photoUrl}
                       alt="User Avatar"
                     />
                   </div>
                 </div>
               )}
-              <div className="chat-bubble max-w-[80%] break-words">{msg.text}</div>
+              <div className="chat-bubble bg-white max-w-[80%] break-words">
+                {msg.text}
+              </div>
             </div>
           ))}
+
+          {/* 👇 This div scrolls into view on new messages */}
+          <div ref={messagesEndRef} />
         </div>
 
         {/* Input Area */}
