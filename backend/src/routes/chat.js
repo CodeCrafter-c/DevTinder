@@ -26,6 +26,7 @@ chatRouter.get("/:targetUserId", userAuth, async (req, res) => {
     let existingChat = await Chat.findOne({
       participants: { $all: [user._id, targetUserId] },
     }).populate("messages.senderId",'firstname lastname')
+    .populate("participants",'firstname lastname photoUrl')
 
     if (!existingChat) {
       const chat = new Chat({
