@@ -6,7 +6,7 @@ import Profile from "./components/Profile";
 import { Provider } from "react-redux";
 import { appStore } from "./utils/appStore";
 import { Feed } from "./components/feed";
-import Connections from "./components/connections";
+import Connections from "./components/Connections";
 import Requests from "./components/Requests";
 import Chat from "./components/Chat";
 
