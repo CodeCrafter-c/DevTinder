@@ -30,7 +30,7 @@ profileRouter.patch("/edit",userAuth,async(req,res)=>{
     res.json({
       "error":`${err.message}`
     })
-  }}
+  }}f
 })
 
 
