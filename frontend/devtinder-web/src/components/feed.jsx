@@ -14,7 +14,8 @@ export const Feed = function () {
   const [loading, setLoading] = useState(true);
 
   const getFeed = async () => {
-    if (feed) {
+    if (feed && feed.length > 0) {
+        setLoading(false); 
       return;
     }
     try {
@@ -49,7 +50,13 @@ export const Feed = function () {
 
   return (
     <div className="flex justify-center my-10 transition-all duration-300">
-      <div className={animate ? "opacity-0 scale-95 transition-all duration-300" : "opacity-100 scale-100 transition-all duration-300"}>
+      <div
+        className={
+          animate
+            ? "opacity-0 scale-95 transition-all duration-300"
+            : "opacity-100 scale-100 transition-all duration-300"
+        }
+      >
         <UserCard user={feed[0]} onAction={handleNextUser} />
       </div>
     </div>
