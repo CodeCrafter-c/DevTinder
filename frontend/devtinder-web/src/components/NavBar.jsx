@@ -1,5 +1,5 @@
 import axios from "axios";
-import React from "react";
+import React, { useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { BASE_URL } from "../utils/constants";
@@ -13,11 +13,13 @@ export default function NavBar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const avatarRef = useRef(null);
+
   const handleLogOut = async () => {
     try {
       await axios.post(BASE_URL + "auth/logout", {}, { withCredentials: true });
       dispatch(removeUser());
-      dispatch(removeConnections())
+      dispatch(removeConnections());
       dispatch(clearRequest());
       dispatch(clearFeed());
       navigate("/login");
@@ -26,12 +28,15 @@ export default function NavBar() {
     }
   };
 
+  // 👇 Utility to close dropdown
+  const closeDropdown = () => {
+    if (avatarRef.current) avatarRef.current.blur();
+  };
+
   return (
     <div className="navbar bg-base-300 shadow-sm px-4 sm:px-6">
       <div className="flex-1">
-        <Link to="/" className="btn btn-ghost text-xl">
-          Dev Tinder
-        </Link>
+        <Link to="/" className="btn btn-ghost text-xl">Dev Tinder</Link>
       </div>
 
       {user && (
@@ -43,28 +48,31 @@ export default function NavBar() {
           <div className="dropdown dropdown-end">
             <div
               tabIndex={0}
+              ref={avatarRef}
               role="button"
+              onClick={() => avatarRef.current?.focus()}
               className="btn btn-ghost btn-circle avatar"
             >
               <div className="w-10 rounded-full overflow-hidden">
                 <img alt="user photo" src={user.photoUrl} />
               </div>
             </div>
+
             <ul
               tabIndex={0}
               className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
             >
               <li>
-                <Link to="/profile">Profile</Link>
+                <Link to="/profile" onClick={closeDropdown}>Profile</Link>
               </li>
               <li>
-                <Link to="/connections">Connectiions</Link>
+                <Link to="/connections" onClick={closeDropdown}>Connections</Link>
               </li>
               <li>
-                <Link to="/requests">Requests</Link>
+                <Link to="/requests" onClick={closeDropdown}>Requests</Link>
               </li>
               <li>
-                <button onClick={handleLogOut}>Logout</button>
+                <button onClick={() => { closeDropdown(); handleLogOut(); }}>Logout</button>
               </li>
             </ul>
           </div>

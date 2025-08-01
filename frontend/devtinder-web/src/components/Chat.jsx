@@ -31,10 +31,7 @@ export default function ChatBox() {
     socket.emit("onlineUser", userId); // Notify backend
 
     socket.on("newMessageReceived", ({ firstname, text, userId: senderId }) => {
-      setMessages((prev) => [
-        ...prev,
-        { _id: Date.now(), senderId, text },
-      ]);
+      setMessages((prev) => [...prev, { _id: Date.now(), senderId, text }]);
     });
 
     socket.on("userOnlineStatus", ({ userId: onlineUserId, isOnline }) => {
@@ -50,6 +47,7 @@ export default function ChatBox() {
   }, [cleanedTargetUserId, userId]);
 
   useEffect(() => {
+    if (!userId) return; 
     fetchChatMessages();
   }, [userId]);
 
@@ -59,11 +57,16 @@ export default function ChatBox() {
 
   const fetchChatMessages = async () => {
     try {
-      const { data } = await axios.get(`${BASE_URL}chat/${cleanedTargetUserId}`, {
-        withCredentials: true,
-      });
+      const { data } = await axios.get(
+        `${BASE_URL}chat/${cleanedTargetUserId}`,
+        {
+          withCredentials: true,
+        }
+      );
 
-      const otherUser = data.messages.participants.find((u) => u._id !== userId);
+      const otherUser = data.messages.participants.find(
+        (u) => u._id !== userId
+      );
       if (otherUser) {
         setOtherUserDetails({
           name: `${otherUser.firstname} ${otherUser.lastname}`,
@@ -139,7 +142,10 @@ export default function ChatBox() {
         <div className="p-4 flex items-center gap-3 border-b bg-base-300 rounded-t-2xl">
           <div className="avatar">
             <div className="w-10 rounded-full">
-              <img src={otherUserDetails.photoUrl || "/default-avatar.png"} alt="Avatar" />
+              <img
+                src={otherUserDetails.photoUrl || "/default-avatar.png"}
+                alt="Avatar"
+              />
             </div>
           </div>
           <div>
@@ -153,16 +159,22 @@ export default function ChatBox() {
           {messages.map((msg) => (
             <div
               key={msg._id}
-              className={`chat ${msg.senderId === userId ? "chat-end" : "chat-start"}`}
+              className={`chat ${
+                msg.senderId === userId ? "chat-end" : "chat-start"
+              }`}
             >
               {msg.senderId !== userId && (
                 <div className="chat-image avatar">
                   <div className="w-8 rounded-full">
-                    <img src={otherUserDetails.photoUrl || "/default-avatar.png"} />
+                    <img
+                      src={otherUserDetails.photoUrl || "/default-avatar.png"}
+                    />
                   </div>
                 </div>
               )}
-              <div className="chat-bubble bg-white max-w-[80%] break-words">{msg.text}</div>
+              <div className="chat-bubble bg-white max-w-[80%] break-words">
+                {msg.text}
+              </div>
             </div>
           ))}
           <div ref={messagesEndRef} />
