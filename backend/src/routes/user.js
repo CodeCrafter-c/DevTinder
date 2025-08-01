@@ -39,6 +39,7 @@ userRouter.get("/requests", userAuth, async (req, res) => {
 
 userRouter.get("/connections", userAuth, async (req, res) => {
   const loggedInUser = req.user;
+  // console.log(loggedInUser)
   try {
     const allConnections = await ConnectionRequest.find({
       $or: [
@@ -48,6 +49,7 @@ userRouter.get("/connections", userAuth, async (req, res) => {
     })
       .populate("fromUserId", "firstname lastname About photoUrl")
       .populate("toUserId", "firstname lastname About photoUrl");
+    // console.log(allConnections);
 
     if (!allConnections.length) {
       return res.json({
@@ -55,21 +57,24 @@ userRouter.get("/connections", userAuth, async (req, res) => {
         data: [],
       });
     }
+    // console.log("all:- ", allConnections);
+    const data = allConnections
+      .filter((row) => row.fromUserId && row.toUserId) // filter out broken references
+      .map((row) => {
+        if (row.fromUserId._id.toString() === loggedInUser._id.toString()) {
+          return row.toUserId;
+        }
+        return row.fromUserId;
+      });
 
-    const data = allConnections.map((row) => {
-      if (row.fromUserId._id.toString() === loggedInUser._id.toString()) {
-        return row.toUserId;
-      }
-      return row.fromUserId;
-    });
-
+    // console.log(data);
     res.json({
       message: "Connections found",
       data: data,
     });
   } catch (err) {
     res.json({
-      error: `${err.message}`,
+      error: `${err.stack}`,
     });
   }
 });
