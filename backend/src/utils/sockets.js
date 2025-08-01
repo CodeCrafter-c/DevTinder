@@ -1,28 +1,33 @@
-const socket = require("socket.io");
-const { Chat } = require("../models/chat");
+  const socket = require("socket.io");
+  const { Chat } = require("../models/chat");
 
-const intializeScoket = (server) => {
-  const io = socket(server, {
-    cors: {
-      origin: "http://localhost:5173",
-    },
-  });
+  const onlineUsers = new Map(); // userId -> socket.id
 
-  io.on("connection", (socket) => {
-    socket.on("joinChat", ({ userId, cleanedTargetUserId }) => {
-      // console.log("id ",cleanTargetUserId);
-      const roomId = [userId, cleanedTargetUserId].sort().join("_");
-      console.log(roomId);
-      socket.join(roomId);
+  const intializeScoket = (server) => {
+    const io = socket(server, {
+      cors: {
+        origin: "http://localhost:5173", // frontend origin
+        methods: ["GET", "POST"],
+      },
     });
 
-    socket.on(
-      "sendMessage",
-      async ({ text, firstname, cleanedTargetUserId, userId }) => {
-        // console.log(text);
-        const roomId = [userId, cleanedTargetUserId].sort().join("_");
+    io.on("connection", (socket) => {
+      console.log("A user connected:", socket.id);
 
-        // save messages to the databases
+      socket.on("onlineUser", (userId) => {
+        onlineUsers.set(userId, socket.id);
+        io.emit("userOnlineStatus", { userId, isOnline: true });
+      });
+
+      socket.on("joinChat", ({ userId, cleanedTargetUserId }) => {
+        const roomId = [userId, cleanedTargetUserId].sort().join("_");
+        socket.join(roomId);
+      });
+
+      socket.on(
+        "sendMessage",
+        async ({ text, firstname, cleanedTargetUserId, userId }) => {
+          const roomId = [userId, cleanedTargetUserId].sort().join("_");
 
           try {
             let chat = await Chat.findOne({
@@ -43,24 +48,33 @@ const intializeScoket = (server) => {
 
             await chat.save();
           } catch (err) {
-            console.log(err);
+            console.error("Message save error:", err);
           }
 
+          io.to(roomId).emit("newMessageReceived", {
+            firstname,
+            text,
+            userId,
+            cleanedTargetUserId,
+            timeStamps: Date.now(),
+          });
+        }
+      );
 
-        io.to(roomId).emit("newMessageReceived", {
-          firstname,
-          text,
-          userId,
-          cleanedTargetUserId,
-          timeStamps:Date.now()
-        });
-      }
-    );
+      socket.on("disconnect", () => {
+        for (const [userId, socketId] of onlineUsers.entries()) {
+          if (socketId === socket.id) {
+            onlineUsers.delete(userId);
+            io.emit("userOnlineStatus", { userId, isOnline: false });
+            break;
+          }
+        }
 
-    socket.on("disconnect", () => {});
-  });
-};
+        console.log("User disconnected:", socket.id);
+      });
+    });
+  };
 
-module.exports = {
-  intializeScoket,
-};
+  module.exports = {
+    intializeScoket,
+  };
