@@ -2,7 +2,7 @@ const { getRounds } = require("bcrypt");
 const validator = require("validator");
 
 const validateSignUpData = function (req, res) {
-  let { firstname, lastname, email, password} = req.body;
+  let { firstname, lastname, email, password } = req.body;
 
   // Trim everything first
   firstname = firstname?.trim();
@@ -38,14 +38,15 @@ const validateSignUpData = function (req, res) {
   req.body.password = password;
 };
 
-
 const validateUserEditDetails = function (req) {
   const allowedUpdates = ["firstname", "lastname", "age", "About", "gender"];
   const input = req.body;
   const updates = {};
 
   // Check for only allowed fields
-  const isValidUpdate = Object.keys(input).every(key => allowedUpdates.includes(key));
+  const isValidUpdate = Object.keys(input).every((key) =>
+    allowedUpdates.includes(key)
+  );
   if (!isValidUpdate) {
     throw new Error("Update not allowed. Please pass only allowed fields.");
   }
@@ -77,7 +78,9 @@ const validateUserEditDetails = function (req) {
 
   // Handle photo file separately (not part of allowedUpdates check)
   if (req.file) {
-    req.user.photoUrl = req.file.buffer.toString("base64");
+    const base64String = req.file.buffer.toString("base64");
+    const mimeType = req.file.mimetype;
+    req.user.photoUrl = `data:${mimeType};base64,${base64String}`;
   }
 
   // Apply validated updates to req.user
@@ -86,20 +89,16 @@ const validateUserEditDetails = function (req) {
   }
 };
 
-
-const validateEmail=function(email){
-  
-  if(validator.isEmail(email)){
+const validateEmail = function (email) {
+  if (validator.isEmail(email)) {
     return true;
+  } else {
+    throw new Error("Not a valid email");
   }
-  else{
-    throw new Error("Not a valid email")
-  }
-}
+};
 
 module.exports = {
   validateSignUpData,
   validateUserEditDetails,
-  validateEmail
+  validateEmail,
 };
- 
