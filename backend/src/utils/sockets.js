@@ -12,7 +12,7 @@
     });
 
     io.on("connection", (socket) => {
-      console.log("A user connected:", socket.id);
+//      console.log("A user connected:", socket.id);
 
       socket.on("onlineUser", (userId) => {
         onlineUsers.set(userId, socket.id);
@@ -70,7 +70,7 @@
           }
         }
 
-        console.log("User disconnected:", socket.id);
+  //      console.log("User disconnected:", socket.id);
       });
     });
   };
