@@ -60,8 +60,7 @@ const validateUserEditDetails = function (req) {
   }
 
   if (typeof input.About === "string" && input.About.trim()) {
-    // console.log("about ",input.About)
-    updates.About = input.About.trim(); // note: stored as "about" not "About"
+    updates.About = input.About.trim(); // stored as "About"
   }
 
   const age = Number(input.age);
@@ -76,11 +75,17 @@ const validateUserEditDetails = function (req) {
     }
   }
 
-  // Apply valid updates to req.user
+  // Handle photo file separately (not part of allowedUpdates check)
+  if (req.file) {
+    req.user.photoUrl = req.file.buffer.toString("base64");
+  }
+
+  // Apply validated updates to req.user
   for (const key in updates) {
     req.user[key] = updates[key];
   }
 };
+
 
 const validateEmail=function(email){
   
