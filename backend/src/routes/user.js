@@ -20,19 +20,24 @@ userRouter.get("/requests", userAuth, async (req, res) => {
       status: "intersted",
     }).populate("fromUserId", ["firstname", "lastname", "About", "photoUrl"]);
 
-    if (requests.length == 0) {
+    // Filter out requests where the user who sent it no longer exists
+    const validRequests = requests.filter(
+      (req) => req.fromUserId !== null
+    );
+
+    if (validRequests.length === 0) {
       return res.status(200).json({
         message: "You are all caught up.",
         data: [],
       });
     }
 
-    res.json({
-      data: requests,
+    res.status(200).json({
+      data: validRequests,
     });
   } catch (err) {
-    res.json({
-      error: `${err.message}`,
+    res.status(500).json({
+      error: err.message,
     });
   }
 });
